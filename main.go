@@ -1,27 +1,45 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 )
 
 // serverList is a list of URLs of the servers to which the requests will be forwarded.
 var (
-	serverList = []string{
-		"http://localhost:5000",
-		"http://localhost:5001",
-		"http://localhost:5002",
-		"http://localhost:5003",
-		"http://localhost:5004",
-	}
+	serverList      []string
 	lastServedIndex = 0
 )
 
 func main() {
+	loadConfig("config.json")
 	http.HandleFunc("/", forwardResponse)
 	log.Fatal(http.ListenAndServe(":8000", nil))
+}
+
+// loadConfig reads the server list from a JSON configuration file.
+func loadConfig(filename string) {
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatalf("Failed to open config file: %v", err)
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	config := struct {
+		Servers []string `json:"servers"`
+	}{}
+
+	err = decoder.Decode(&config)
+	if err != nil {
+		log.Fatalf("Failed to parse config file: %v", err)
+	}
+
+	serverList = config.Servers
 }
 
 // forwardResponse forwards the HTTP request to the server specified by the URL returned from getServerUrl().
