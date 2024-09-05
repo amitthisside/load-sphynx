@@ -19,7 +19,9 @@ var (
 func main() {
 	loadConfig("server_conf.json")
 	http.HandleFunc("/", forwardResponse)
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	port := ":8000"
+	log.Printf("Starting server on port %s", port)
+	log.Fatal(http.ListenAndServe(port, nil))
 }
 
 // loadConfig reads the server list from a JSON configuration file.
