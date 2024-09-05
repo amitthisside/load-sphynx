@@ -7,12 +7,13 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"sync"
 )
 
-// serverList is a list of URLs of the servers to which the requests will be forwarded.
 var (
 	serverList      []string
 	lastServedIndex = 0
+	mu              sync.Mutex // Mutex to protect lastServedIndex
 )
 
 func main() {
@@ -53,13 +54,21 @@ func forwardResponse(res http.ResponseWriter, req *http.Request) {
 	rProxy.ServeHTTP(res, req)
 }
 
-// to get the next server url to forward the request to
+// getServerUrl returns the next server URL to forward the request to.
 func getServerUrl() *url.URL {
-	nextIndex := (lastServedIndex + 1) % len(serverList)
-	url, err := url.Parse(serverList[nextIndex])
-	lastServedIndex = nextIndex
-	if err != nil {
-		log.Fatal(err)
+	mu.Lock()
+	defer mu.Unlock()
+
+	if len(serverList) == 0 {
+		log.Fatal("No servers available")
 	}
-	return url
+
+	nextIndex := (lastServedIndex + 1) % len(serverList)
+	serverURL, err := url.Parse(serverList[nextIndex])
+	if err != nil {
+		log.Fatalf("Failed to parse server URL: %v", err)
+	}
+
+	lastServedIndex = nextIndex
+	return serverURL
 }
