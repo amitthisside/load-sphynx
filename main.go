@@ -16,7 +16,7 @@ var (
 )
 
 func main() {
-	loadConfig("config.json")
+	loadConfig("server_conf.json")
 	http.HandleFunc("/", forwardResponse)
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
