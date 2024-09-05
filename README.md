@@ -1,6 +1,6 @@
 
 # Load Sphynx
-## NOTE : Current code is on the `dev` branch 
+### NOTE : Current code is on the `dev` branch 
 
 Building a load balancer named "Load Sphynx" from scratch using Go. **Note:** This is for educational purposes and should not be used in production.
 
