@@ -5,7 +5,7 @@ app = Flask(__name__)
 serverName = sys.argv[1]
 
 @app.route('/')
-def hello_world():
+def hello():
     return f'This is {serverName}'
 
 if __name__ == '__main__':
