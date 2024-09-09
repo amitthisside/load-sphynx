@@ -6,29 +6,28 @@ import (
 	"net/url"
 )
 
-type server struct {
+type Server struct {
 	Name         string
 	URL          string
-	ReverseProxy *httputil.ReverseProxy
-	Health       bool
 	Weight       int
+	Health       bool
 	Connections  int
+	ReverseProxy *httputil.ReverseProxy
 }
 
-func newServer(name, urlStr string, weight int) *server {
-	u, _ := url.Parse(urlStr)
-	rp := httputil.NewSingleHostReverseProxy(u)
-	return &server{
+func NewServer(name, urlStr string, weight int) *Server {
+	url, _ := url.Parse(urlStr)
+	return &Server{
 		Name:         name,
 		URL:          urlStr,
-		ReverseProxy: rp,
-		Health:       true,
 		Weight:       weight,
+		Health:       true,
 		Connections:  0,
+		ReverseProxy: httputil.NewSingleHostReverseProxy(url),
 	}
 }
 
-func (s *server) checkHealth() bool {
+func (s *Server) checkHealth() bool {
 	resp, err := http.Head(s.URL)
 	if err != nil {
 		s.Health = false

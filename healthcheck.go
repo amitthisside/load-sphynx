@@ -1,26 +1,28 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"github.com/go-co-op/gocron"
 )
 
-func startHealthCheck() {
-	s := gocron.NewScheduler(time.Local)
-	for _, host := range serverList {
-		_, err := s.Every(2).Seconds().Do(func(s *server) {
-			healthy := s.checkHealth()
-			if healthy {
-				log.Printf("'%s' is healthy!", s.Name)
-			} else {
-				log.Printf("'%s' is not healthy", s.Name)
+func startHealthCheck(virtualServices []*VirtualService) {
+	for _, vs := range virtualServices {
+		logger := vs.Logger
+		s := gocron.NewScheduler(time.Local)
+		for _, host := range vs.ServerList {
+			_, err := s.Every(2).Seconds().Do(func(s *Server) {
+				healthy := s.checkHealth()
+				if healthy {
+					logger.Infof("'%s' is healthy!", s.Name)
+				} else {
+					logger.Warnf("'%s' is not healthy", s.Name)
+				}
+			}, host)
+			if err != nil {
+				logger.Fatalln(err)
 			}
-		}, host)
-		if err != nil {
-			log.Fatalln(err)
 		}
+		s.StartAsync()
 	}
-	s.StartAsync()
 }
