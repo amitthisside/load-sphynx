@@ -1,25 +1,37 @@
 package main
 
 import (
-	"fmt"
+	"errors"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
 
 var (
-	currentIndex  = -1
-	currentWeight = 0
+	rrIndex       int
+	rrMutex       sync.Mutex
+	currentIndex  int
+	currentWeight int
+
+	healthState = make(map[string]bool)
 )
 
 func getRoundRobinServer(serverList []*Server, logger *logrus.Logger) (*Server, error) {
-	for i := 0; i < len(serverList); i++ {
-		server := serverList[(currentIndex+i)%len(serverList)]
+	rrMutex.Lock()
+	defer rrMutex.Unlock()
+
+	if len(serverList) == 0 {
+		return nil, errors.New("no servers available")
+	}
+
+	for {
+		rrIndex = (rrIndex + 1) % len(serverList)
+		server := serverList[rrIndex]
 		if server.Health {
-			currentIndex = (currentIndex + i + 1) % len(serverList)
+			logServerHealthChanges(serverList, logger)
 			return server, nil
 		}
 	}
-	return nil, fmt.Errorf("no healthy hosts")
 }
 
 func getWeightedRoundRobinServer(serverList []*Server, logger *logrus.Logger) (*Server, error) {
@@ -30,7 +42,7 @@ func getWeightedRoundRobinServer(serverList []*Server, logger *logrus.Logger) (*
 		}
 	}
 	if totalWeight == 0 {
-		return nil, fmt.Errorf("no healthy hosts")
+		return nil, errors.New("no healthy hosts")
 	}
 
 	for {
@@ -58,7 +70,7 @@ func getLeastConnectionsServer(serverList []*Server, logger *logrus.Logger) (*Se
 		}
 	}
 	if leastConnServer == nil {
-		return nil, fmt.Errorf("no healthy hosts")
+		return nil, errors.New("no healthy hosts")
 	}
 	logServerHealthChanges(serverList, logger)
 	return leastConnServer, nil
@@ -77,7 +89,7 @@ func getWeightedLeastConnectionsServer(serverList []*Server, logger *logrus.Logg
 		}
 	}
 	if bestServer == nil {
-		return nil, fmt.Errorf("no healthy hosts")
+		return nil, errors.New("no healthy hosts")
 	}
 	logServerHealthChanges(serverList, logger)
 	return bestServer, nil

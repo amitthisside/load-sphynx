@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 
 	"github.com/sirupsen/logrus"
 )
@@ -19,15 +22,12 @@ func (vs *VirtualService) Start() {
 	mux.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
 		forwardRequest(res, req, vs)
 	})
-	vs.Logger.WithFields(logrus.Fields{
-		"port":      vs.Port,
-		"algorithm": vs.Algorithm,
-	}).Info("Starting virtual service")
+	vs.Logger.Infof("Starting virtual service on port %d with algorithm %s", vs.Port, vs.Algorithm)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", vs.Port),
 		Handler: mux,
 	}
-	vs.Logger.Fatal(server.ListenAndServe())
+	log.Fatal(server.ListenAndServe())
 }
 
 func forwardRequest(res http.ResponseWriter, req *http.Request, vs *VirtualService) {
@@ -38,10 +38,16 @@ func forwardRequest(res http.ResponseWriter, req *http.Request, vs *VirtualServi
 	}
 	server.Connections++
 	defer func() { server.Connections-- }()
-	vs.Logger.WithFields(logrus.Fields{
-		"server": server.URL,
-	}).Info("Forwarding request")
-	server.ReverseProxy.ServeHTTP(res, req)
+
+	vs.Logger.Infof("Forwarding request to: %s", server.URL)
+	proxyURL, err := url.Parse(server.URL)
+	if err != nil {
+		http.Error(res, "Invalid server URL: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(proxyURL)
+	proxy.ServeHTTP(res, req)
 }
 
 func getHealthyServer(vs *VirtualService) (*Server, error) {

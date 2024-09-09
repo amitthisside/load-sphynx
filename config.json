@@ -1,0 +1,39 @@
+[
+  {
+    "Port": 8000,
+    "Algorithm": "weighted_round_robin",
+    "ServerList": [
+      {
+        "Name": "server-1",
+        "URL": "http://localhost:5001",
+        "Weight": 1000
+      },
+      {
+        "Name": "server-2",
+        "URL": "http://localhost:5002",
+        "Weight": 500
+      }
+    ]
+  },
+  {
+    "Port": 8001,
+    "Algorithm": "round_robin",
+    "ServerList": [
+      {
+        "Name": "server-3",
+        "URL": "http://localhost:5003",
+        "Weight": 1000
+      },
+      {
+        "Name": "server-4",
+        "URL": "http://localhost:5004",
+        "Weight": 500
+      },
+      {
+        "Name": "server-5",
+        "URL": "http://localhost:5005",
+        "Weight": 1000
+      }
+    ]
+  }
+]
