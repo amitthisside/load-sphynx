@@ -45,20 +45,29 @@ func initConfig() {
 	}
 
 	if _, err := os.Stat(absConfigFile); os.IsNotExist(err) {
-		fmt.Println("No config file found, please enter configuration manually.")
+		fmt.Println("No config file found, entering configuration manually.")
 		readConfigFromInput()
 	} else {
-		data, err := os.ReadFile(absConfigFile)
-		if err != nil {
-			fmt.Printf("Error reading config file: %v\n", err)
-			os.Exit(1)
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Config file found. Do you want to use it? (y/n): ")
+		useConfig, _ := reader.ReadString('\n')
+		useConfig = strings.TrimSpace(useConfig)
+		if useConfig == "y" {
+			data, err := os.ReadFile(absConfigFile)
+			if err != nil {
+				fmt.Printf("Error reading config file: %v\n", err)
+				os.Exit(1)
+			}
+			err = json.Unmarshal(data, &virtualServices)
+			if err != nil {
+				fmt.Printf("Error parsing config file: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Println("Config file successfully loaded.")
+		} else {
+			fmt.Println("Entering configuration manually.")
+			readConfigFromInput()
 		}
-		err = json.Unmarshal(data, &virtualServices)
-		if err != nil {
-			fmt.Printf("Error parsing config file: %v\n", err)
-			os.Exit(1)
-		}
-		fmt.Println("Config file found and successfully loaded.")
 	}
 }
 
