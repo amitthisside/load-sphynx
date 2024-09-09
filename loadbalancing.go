@@ -40,6 +40,7 @@ func getWeightedRoundRobinServer() (*server, error) {
 			}
 		}
 		if serverList[currentIndex].Health && serverList[currentIndex].Weight >= currentWeight {
+			logServerHealthChanges()
 			return serverList[currentIndex], nil
 		}
 	}
@@ -57,6 +58,7 @@ func getLeastConnectionsServer() (*server, error) {
 	if leastConnServer == nil {
 		return nil, fmt.Errorf("no healthy hosts")
 	}
+	logServerHealthChanges()
 	return leastConnServer, nil
 }
 
@@ -75,5 +77,6 @@ func getWeightedLeastConnectionsServer() (*server, error) {
 	if bestServer == nil {
 		return nil, fmt.Errorf("no healthy hosts")
 	}
+	logServerHealthChanges()
 	return bestServer, nil
 }
