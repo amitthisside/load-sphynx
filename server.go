@@ -11,9 +11,11 @@ type server struct {
 	URL          string
 	ReverseProxy *httputil.ReverseProxy
 	Health       bool
+	Weight       int
+	Connections  int
 }
 
-func newServer(name, urlStr string) *server {
+func newServer(name, urlStr string, weight int) *server {
 	u, _ := url.Parse(urlStr)
 	rp := httputil.NewSingleHostReverseProxy(u)
 	return &server{
@@ -21,6 +23,8 @@ func newServer(name, urlStr string) *server {
 		URL:          urlStr,
 		ReverseProxy: rp,
 		Health:       true,
+		Weight:       weight,
+		Connections:  0,
 	}
 }
 
