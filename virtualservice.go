@@ -11,10 +11,10 @@ import (
 )
 
 type VirtualService struct {
-	Port       int
-	Algorithm  string
-	ServerList []*Server
-	Logger     *logrus.Logger
+	Port       int            `json:"port"`
+	Algorithm  string         `json:"algorithm"`
+	ServerList []*Server      `json:"server_list"`
+	Logger     *logrus.Logger `json:"-"`
 }
 
 func (vs *VirtualService) Start() {

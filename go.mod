@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	github.com/go-co-op/gocron v1.37.0
+	github.com/gorilla/mux v1.8.1
 	github.com/sirupsen/logrus v1.9.3
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )

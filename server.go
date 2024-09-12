@@ -7,11 +7,11 @@ import (
 )
 
 type Server struct {
-	Name         string
-	URL          string
-	Weight       int
-	Health       bool
-	Connections  int
+	Name         string `json:"name"`
+	URL          string `json:"url"`
+	Weight       int    `json:"weight"`
+	Health       bool   `json:"health"`
+	Connections  int    `json:"connections"`
 	ReverseProxy *httputil.ReverseProxy
 }
 

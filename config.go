@@ -76,10 +76,12 @@ func readConfigFromInput() {
 			serverList = append(serverList, NewServer(name, url, weight))
 		}
 
+		// Ensure we append new VirtualService to the global slice
 		virtualServices = append(virtualServices, &VirtualService{
 			Port:       port,
 			Algorithm:  algorithm,
 			ServerList: serverList,
+			Logger:     initLogging(&VirtualService{Port: port, Algorithm: algorithm}),
 		})
 
 		fmt.Print("Add another virtual service? (y/n): ")
