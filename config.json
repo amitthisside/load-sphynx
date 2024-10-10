@@ -40,7 +40,7 @@
           {
               "name": "Server5",
               "url": "http://localhost:5005",
-              "weight": 1,
+              "weight": 2,
               "health": true,
               "connections": 0
           }
